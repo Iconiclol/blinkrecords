@@ -1,8 +1,25 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Music, Users, Disc3, Mail, Instagram, Twitter, Youtube, Play, Star, Zap } from "lucide-react"
 
 export default function BlinkRecords() {
+  // Add scroll functions
+  const scrollToReleases = () => {
+    const releasesSection = document.getElementById("releases")
+    if (releasesSection) {
+      releasesSection.scrollIntoView({ behavior: "smooth" })
+    }
+  }
+
+  const scrollToArtists = () => {
+    const artistsSection = document.getElementById("artists")
+    if (artistsSection) {
+      artistsSection.scrollIntoView({ behavior: "smooth" })
+    }
+  }
+
   return (
     <div className="min-h-screen bg-black text-white overflow-x-hidden">
       {/* Hero Section */}
@@ -27,11 +44,15 @@ export default function BlinkRecords() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-            <Button className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 text-white px-8 py-4 text-lg font-semibold rounded-full shadow-[0_0_30px_rgba(255,0,255,0.6)] hover:shadow-[0_0_40px_rgba(255,0,255,0.8)] transition-all duration-300 hover:scale-105 border border-pink-400">
+            <Button
+              onClick={scrollToReleases}
+              className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 text-white px-8 py-4 text-lg font-semibold rounded-full shadow-[0_0_30px_rgba(255,0,255,0.6)] hover:shadow-[0_0_40px_rgba(255,0,255,0.8)] transition-all duration-300 hover:scale-105 border border-pink-400"
+            >
               <Play className="mr-2 h-5 w-5" />
               Listen Now
             </Button>
             <Button
+              onClick={scrollToArtists}
               variant="outline"
               className="border-2 border-cyan-400 text-cyan-400 hover:bg-cyan-400 hover:text-black px-8 py-4 text-lg font-semibold rounded-full transition-all duration-300 hover:scale-105 bg-transparent shadow-[0_0_20px_rgba(0,255,255,0.5)] hover:shadow-[0_0_30px_rgba(0,255,255,0.8)]"
             >
@@ -104,7 +125,7 @@ export default function BlinkRecords() {
       </section>
 
       {/* Featured Artists */}
-      <section className="py-20 bg-gradient-to-br from-purple-900/50 via-black to-pink-900/50 relative">
+      <section id="artists" className="py-20 bg-gradient-to-br from-purple-900/50 via-black to-pink-900/50 relative">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-pink-500 via-yellow-400 to-cyan-400 bg-clip-text text-transparent drop-shadow-[0_0_25px_rgba(255,0,255,0.8)]">
@@ -160,7 +181,7 @@ export default function BlinkRecords() {
       </section>
 
       {/* Latest Releases */}
-      <section className="py-20 bg-black relative">
+      <section id="releases" className="py-20 bg-black relative">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_25%,rgba(255,0,128,0.2),transparent_50%)]"></div>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_75%,rgba(0,255,0,0.2),transparent_50%)]"></div>
         <div className="container mx-auto px-4 relative z-10">
