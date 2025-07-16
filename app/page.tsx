@@ -3,6 +3,9 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Music, Users, Disc3, Mail, Instagram, Twitter, Youtube, Play, Star, Zap } from "lucide-react"
+import { sampleTracks, sampleArtists, getMediaUrl } from "@/lib/media-utils"
+import { audioManager } from "@/lib/audio-player"
+import { useState } from "react"
 
 export default function BlinkRecords() {
   // Add scroll functions
@@ -17,6 +20,31 @@ export default function BlinkRecords() {
     const artistsSection = document.getElementById("artists")
     if (artistsSection) {
       artistsSection.scrollIntoView({ behavior: "smooth" })
+    }
+  }
+
+  const [currentTrack, setCurrentTrack] = useState<string | null>(null)
+  const [isPlaying, setIsPlaying] = useState(false)
+
+  // Handle play/pause functionality
+  const handlePlayTrack = async (trackId: string) => {
+    const track = sampleTracks.find((t) => t.id === trackId)
+    if (!track) return
+
+    try {
+      if (currentTrack === trackId && isPlaying) {
+        audioManager.pause()
+        setIsPlaying(false)
+      } else {
+        if (currentTrack !== trackId) {
+          await audioManager.loadTrack(getMediaUrl(track.audioUrl))
+          setCurrentTrack(trackId)
+        }
+        await audioManager.play()
+        setIsPlaying(true)
+      }
+    } catch (error) {
+      console.error("Playback error:", error)
     }
   }
 
@@ -135,47 +163,56 @@ export default function BlinkRecords() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {[
-              {
-                name: "NEON PULSE",
-                genre: "Synthwave",
-                color: "from-cyan-400 to-blue-500",
-                shadow: "rgba(0,255,255,0.6)",
-              },
-              {
-                name: "ELECTRIC DREAMS",
-                genre: "Electronic Pop",
-                color: "from-pink-500 to-purple-500",
-                shadow: "rgba(255,0,255,0.6)",
-              },
-              {
-                name: "DIGITAL STORM",
-                genre: "Future Bass",
-                color: "from-lime-400 to-cyan-400",
-                shadow: "rgba(0,255,0,0.6)",
-              },
-            ].map((artist, index) => (
-              <Card
-                key={index}
-                className="bg-black/70 border-2 border-gray-800 hover:border-cyan-400/80 transition-all duration-300 group hover:scale-105 shadow-[0_0_30px_rgba(0,255,255,0.3)] hover:shadow-[0_0_50px_rgba(0,255,255,0.6)]"
-              >
-                <CardContent className="p-6">
-                  <div
-                    className={`w-full h-48 bg-gradient-to-br ${artist.color} rounded-lg mb-6 flex items-center justify-center group-hover:shadow-[0_0_40px_${artist.shadow}] transition-all duration-300 border border-white/20`}
-                  >
-                    <Disc3 className="w-16 h-16 text-white animate-spin group-hover:animate-pulse drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-white mb-2 drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">
-                    {artist.name}
-                  </h3>
-                  <p className="text-gray-400 mb-4">{artist.genre}</p>
-                  <Button className="w-full bg-gradient-to-r from-cyan-400/30 to-pink-500/30 hover:from-cyan-400/50 hover:to-pink-500/50 border-2 border-cyan-400/50 text-cyan-400 shadow-[0_0_20px_rgba(0,255,255,0.4)] hover:shadow-[0_0_30px_rgba(0,255,255,0.6)]">
-                    <Play className="mr-2 h-4 w-4" />
-                    Listen
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
+            {sampleArtists.map((artist, index) => {
+              const colors = [
+                { color: "from-cyan-400 to-blue-500", shadow: "rgba(0,255,255,0.6)" },
+                { color: "from-pink-500 to-purple-500", shadow: "rgba(255,0,255,0.6)" },
+                { color: "from-lime-400 to-cyan-400", shadow: "rgba(0,255,0,0.6)" },
+              ]
+              const artistColor = colors[index % colors.length]
+
+              return (
+                <Card
+                  key={artist.id}
+                  className="bg-black/70 border-2 border-gray-800 hover:border-cyan-400/80 transition-all duration-300 group hover:scale-105 shadow-[0_0_30px_rgba(0,255,255,0.3)] hover:shadow-[0_0_50px_rgba(0,255,255,0.6)]"
+                >
+                  <CardContent className="p-6">
+                    <div
+                      className={`w-full h-48 bg-gradient-to-br ${artistColor.color} rounded-lg mb-6 flex items-center justify-center group-hover:shadow-[0_0_40px_${artistColor.shadow}] transition-all duration-300 border border-white/20 overflow-hidden`}
+                    >
+                      <img
+                        src={getMediaUrl(artist.profileImage) || "/placeholder.svg"}
+                        alt={artist.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          // Fallback to icon if image fails to load
+                          e.currentTarget.style.display = "none"
+                          e.currentTarget.nextElementSibling.style.display = "flex"
+                        }}
+                      />
+                      <Disc3 className="w-16 h-16 text-white animate-spin group-hover:animate-pulse drop-shadow-[0_0_15px_rgba(255,255,255,0.8)] hidden" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-white mb-2 drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">
+                      {artist.name}
+                    </h3>
+                    <p className="text-gray-400 mb-4">{artist.genre}</p>
+                    <Button
+                      onClick={() => {
+                        // Find a track by this artist and play it
+                        const artistTrack = sampleTracks.find((track) => track.artist === artist.name)
+                        if (artistTrack) {
+                          handlePlayTrack(artistTrack.id)
+                        }
+                      }}
+                      className="w-full bg-gradient-to-r from-cyan-400/30 to-pink-500/30 hover:from-cyan-400/50 hover:to-pink-500/50 border-2 border-cyan-400/50 text-cyan-400 shadow-[0_0_20px_rgba(0,255,255,0.4)] hover:shadow-[0_0_30px_rgba(0,255,255,0.6)]"
+                    >
+                      <Play className="mr-2 h-4 w-4" />
+                      Listen
+                    </Button>
+                  </CardContent>
+                </Card>
+              )
+            })}
           </div>
         </div>
       </section>
@@ -193,56 +230,57 @@ export default function BlinkRecords() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
-            {[
-              {
-                title: "Midnight Frequency",
-                artist: "NEON PULSE",
-                color: "from-cyan-400 to-blue-600",
-                shadow: "rgba(0,255,255,0.5)",
-              },
-              {
-                title: "Digital Hearts",
-                artist: "ELECTRIC DREAMS",
-                color: "from-pink-500 to-red-500",
-                shadow: "rgba(255,0,255,0.5)",
-              },
-              {
-                title: "Storm Protocol",
-                artist: "DIGITAL STORM",
-                color: "from-lime-400 to-green-500",
-                shadow: "rgba(0,255,0,0.5)",
-              },
-              {
-                title: "Neon Nights",
-                artist: "VARIOUS ARTISTS",
-                color: "from-yellow-400 to-orange-500",
-                shadow: "rgba(255,255,0,0.5)",
-              },
-            ].map((release, index) => (
-              <Card
-                key={index}
-                className="bg-gray-900/70 border-2 border-gray-700 hover:border-pink-500/80 transition-all duration-300 group hover:scale-105 shadow-[0_0_25px_rgba(255,0,255,0.3)] hover:shadow-[0_0_40px_rgba(255,0,255,0.6)]"
-              >
-                <CardContent className="p-4">
-                  <div
-                    className={`w-full h-40 bg-gradient-to-br ${release.color} rounded-lg mb-4 flex items-center justify-center group-hover:shadow-[0_0_30px_${release.shadow}] transition-all duration-300 border border-white/20`}
-                  >
-                    <Star className="w-12 h-12 text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]" />
-                  </div>
-                  <h4 className="text-lg font-bold text-white mb-1 drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]">
-                    {release.title}
-                  </h4>
-                  <p className="text-gray-400 text-sm mb-3">{release.artist}</p>
-                  <Button
-                    size="sm"
-                    className="w-full bg-gradient-to-r from-pink-500/30 to-purple-500/30 hover:from-pink-500/50 hover:to-purple-500/50 border-2 border-pink-500/50 text-pink-400 shadow-[0_0_15px_rgba(255,0,255,0.4)] hover:shadow-[0_0_25px_rgba(255,0,255,0.6)]"
-                  >
-                    <Play className="mr-1 h-3 w-3" />
-                    Play
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
+            {sampleTracks.map((track, index) => {
+              const colors = [
+                { color: "from-cyan-400 to-blue-600", shadow: "rgba(0,255,255,0.5)" },
+                { color: "from-pink-500 to-red-500", shadow: "rgba(255,0,255,0.5)" },
+                { color: "from-lime-400 to-green-500", shadow: "rgba(0,255,0,0.5)" },
+                { color: "from-yellow-400 to-orange-500", shadow: "rgba(255,255,0,0.5)" },
+              ]
+              const trackColor = colors[index % colors.length]
+              const isCurrentTrack = currentTrack === track.id
+
+              return (
+                <Card
+                  key={track.id}
+                  className="bg-gray-900/70 border-2 border-gray-700 hover:border-pink-500/80 transition-all duration-300 group hover:scale-105 shadow-[0_0_25px_rgba(255,0,255,0.3)] hover:shadow-[0_0_40px_rgba(255,0,255,0.6)]"
+                >
+                  <CardContent className="p-4">
+                    <div
+                      className={`w-full h-40 bg-gradient-to-br ${trackColor.color} rounded-lg mb-4 flex items-center justify-center group-hover:shadow-[0_0_30px_${trackColor.shadow}] transition-all duration-300 border border-white/20 overflow-hidden`}
+                    >
+                      <img
+                        src={getMediaUrl(track.coverArt) || "/placeholder.svg"}
+                        alt={track.title}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          // Fallback to icon if image fails to load
+                          e.currentTarget.style.display = "none"
+                          e.currentTarget.nextElementSibling.style.display = "flex"
+                        }}
+                      />
+                      <Star className="w-12 h-12 text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.8)] hidden" />
+                    </div>
+                    <h4 className="text-lg font-bold text-white mb-1 drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]">
+                      {track.title}
+                    </h4>
+                    <p className="text-gray-400 text-sm mb-3">{track.artist}</p>
+                    <Button
+                      onClick={() => handlePlayTrack(track.id)}
+                      size="sm"
+                      className={`w-full transition-all duration-300 border-2 shadow-[0_0_15px_rgba(255,0,255,0.4)] hover:shadow-[0_0_25px_rgba(255,0,255,0.6)] ${
+                        isCurrentTrack && isPlaying
+                          ? "bg-gradient-to-r from-green-500/50 to-cyan-500/50 border-green-400/50 text-green-400"
+                          : "bg-gradient-to-r from-pink-500/30 to-purple-500/30 hover:from-pink-500/50 hover:to-purple-500/50 border-pink-500/50 text-pink-400"
+                      }`}
+                    >
+                      <Play className="mr-1 h-3 w-3" />
+                      {isCurrentTrack && isPlaying ? "Playing" : "Play"}
+                    </Button>
+                  </CardContent>
+                </Card>
+              )
+            })}
           </div>
         </div>
       </section>
