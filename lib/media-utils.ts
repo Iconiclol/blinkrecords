@@ -66,9 +66,9 @@ export const isValidImageFile = (filename: string): boolean => {
 export const sampleTracks: Track[] = [
   {
     id: "1",
-    title: "Midnight Frequency",
-    artist: "NEON PULSE",
-    album: "Digital Dreams",
+    title: "MDMA",
+    artist: "CHE",
+    album: "REST IN BASS",
     duration: "3:42",
     genre: "Synthwave",
     audioUrl: "audio/tracks/neon-pulse-midnight-frequency.mp3",
