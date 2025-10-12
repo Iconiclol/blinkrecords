@@ -119,8 +119,8 @@ export const sampleArtists: Artist[] = [
   },
   {
     id: "2",
-    name: "ELECTRIC DREAMS",
-    genre: "Electronic Pop",
+    name: "Celeste",
+    genre: "Orlem",
     bio: "Creating infectious electronic pop anthems that bridge the gap between underground and mainstream.",
     profileImage: "images/artists/electric-dreams-profile.jpg",
     coverImage: "images/artists/electric-dreams-cover.jpg",
