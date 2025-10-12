@@ -5,6 +5,9 @@ export const metadata: Metadata = {
   title: 'BLINK Records',
   description: 'BLINK Records',
   generator: 'BLINKRECORDS.XYZ',
+  icons: {
+    icon: '/favicon-96x96.png',
+    apple: '/favicon-96x96.png',
 }
 
 export default function RootLayout({
